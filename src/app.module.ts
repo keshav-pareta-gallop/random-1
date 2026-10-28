@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
+import { TeamMemberModule } from './team-member/team-member.module';
+import { TasksModule } from './tasks/tasks.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -16,6 +20,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       synchronize: false,
       logging: false,
     }),
+    AuthModule,
+    TeamMemberModule,
+    TasksModule,
+    HealthModule,
   ],
 })
 export class AppModule {}
