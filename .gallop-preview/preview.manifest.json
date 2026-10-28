@@ -1,0 +1,10 @@
+{
+  "services": {
+    "frontend": { "cwd": "./random-1", "cmd": "sh", "args": ["-c", "npm install && npx next dev --port 3000"], "port": 3000 },
+    "backend": { "cwd": "./random-2", "cmd": "sh", "args": ["-c", "npm ci && npx tsx src/index.ts"], "port": 8080, "healthCheck": { "path": "/api/health", "timeoutSeconds": 180 } }
+  },
+  "routes": {
+    "/api": { "service": "backend", "stripPrefix": false },
+    "/": { "service": "frontend", "stripPrefix": false }
+  }
+}
