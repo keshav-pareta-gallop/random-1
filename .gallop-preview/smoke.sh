@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
+cd "$(dirname "$0")"
 
-# BASE_URL is set by the platform to the proxy URL
-: "${BASE_URL:?BASE_URL is required}"
+# Resolve service URLs from the manifest
+url() { node -e 'console.log("http://127.0.0.1:" + require("./preview.manifest.json").services[process.argv[1]].port)' "$1"; }
+BACKEND=$(url backend)
+FRONTEND=$(url frontend)
 
 PASS=0
 FAIL=0
@@ -18,12 +21,21 @@ check() {
   fi
 }
 
+# ---------- Wait for backend readiness ----------
+
+echo ""
+echo "Waiting for backend..."
+for i in $(seq 1 30); do
+  curl -fsS "$BACKEND/api/health" >/dev/null 2>&1 && break
+  sleep 1
+done
+
 # ---------- AC1: GET /api/orders returns 3 seeded orders ----------
 
 echo ""
 echo "=== AC1: GET /api/orders returns the three seeded orders ==="
 
-ORDERS_JSON=$(curl -fsS "$BASE_URL/api/orders")
+ORDERS_JSON=$(curl -fsS "$BACKEND/api/orders")
 echo "Response: $ORDERS_JSON"
 
 # Check total is 3
@@ -82,30 +94,30 @@ check "order field values match seed data" [ "$VALS_OK" = "true" ]
 echo ""
 echo "=== AC2: /orders page is served and contains order-rendering markup ==="
 
-ORDERS_HTML=$(curl -fsS "$BASE_URL/orders")
+ORDERS_HTML=$(curl -fsS "$FRONTEND/orders")
 
-check "/orders returns HTML with Order History heading" echo "$ORDERS_HTML" | grep -q "Order History"
+check "/orders returns HTML with Order History heading" grep -q "Order History" <<< "$ORDERS_HTML"
 
 # The page is a client component — the fetch call and rendering logic are in a JS bundle.
 # Extract JS chunk URLs from the HTML and fetch them to verify.
 JS_URLS=$(echo "$ORDERS_HTML" | grep -oE '/_next/static/chunks/[^"]+\.js' | sort -u)
 ALL_JS=""
 for url in $JS_URLS; do
-  CHUNK=$(curl -sS "$BASE_URL$url" 2>/dev/null || true)
+  CHUNK=$(curl -sS "$FRONTEND$url" 2>/dev/null || true)
   ALL_JS="$ALL_JS$CHUNK"
 done
 
 # Combine HTML + JS for checks (the text may be in either)
 ALL_CONTENT="$ORDERS_HTML$ALL_JS"
 
-check "/orders page or JS bundles reference /api/orders fetch" echo "$ALL_CONTENT" | grep -q "/api/orders"
+check "/orders page or JS bundles reference /api/orders fetch" grep -q "/api/orders" <<< "$ALL_CONTENT"
 
 # ---------- AC3: 'No orders yet' text is in the client code ----------
 
 echo ""
 echo "=== AC3: 'No orders yet' text exists in the page or JS bundles ==="
 
-check "'No orders yet' text present in page or JS" echo "$ALL_CONTENT" | grep -q "No orders yet"
+check "'No orders yet' text present in page or JS" grep -q "No orders yet" <<< "$ALL_CONTENT"
 
 # ---------- Summary ----------
 

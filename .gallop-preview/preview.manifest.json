@@ -12,7 +12,8 @@
       "args": ["run", "dev"],
       "port": 8080,
       "healthCheck": {
-        "path": "/api/health"
+        "path": "/api/health",
+        "timeoutSeconds": 120
       }
     }
   },
