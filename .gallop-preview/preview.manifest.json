@@ -1,0 +1,23 @@
+{
+  "services": {
+    "frontend": {
+      "cwd": "./random-1",
+      "cmd": "npx",
+      "args": ["next", "dev", "--port", "3000"],
+      "port": 3000
+    },
+    "backend": {
+      "cwd": "./random-2",
+      "cmd": "npm",
+      "args": ["run", "dev"],
+      "port": 8080,
+      "healthCheck": {
+        "path": "/api/health"
+      }
+    }
+  },
+  "routes": {
+    "/api": { "service": "backend", "stripPrefix": false },
+    "/": { "service": "frontend", "stripPrefix": false }
+  }
+}
