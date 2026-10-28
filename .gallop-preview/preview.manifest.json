@@ -1,7 +1,7 @@
 {
   "services": {
-    "frontend": { "cwd": "./random-1", "cmd": "npx", "args": ["next", "dev", "--port", "3000"], "port": 3000 },
-    "backend": { "cwd": "./random-2", "cmd": "npm", "args": ["run", "dev"], "port": 8080, "healthCheck": { "path": "/api/health" } }
+    "frontend": { "cwd": "./random-1", "cmd": "sh", "args": ["-c", "npm install && npx next dev --port 3000"], "port": 3000 },
+    "backend": { "cwd": "./random-2", "cmd": "sh", "args": ["-c", "npm install && npx tsx src/index.ts"], "port": 8080, "healthCheck": { "path": "/api/health", "timeoutSeconds": 120 } }
   },
   "routes": {
     "/api": { "service": "backend", "stripPrefix": false },
