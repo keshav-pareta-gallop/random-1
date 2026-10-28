@@ -1,3 +1,2 @@
 # Contributors
-
 - Platform QA
