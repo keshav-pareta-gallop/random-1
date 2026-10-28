@@ -1,3 +1,3 @@
 # DESIGN.md
 
-- Minimal list page.
+> No design decisions locked yet.
