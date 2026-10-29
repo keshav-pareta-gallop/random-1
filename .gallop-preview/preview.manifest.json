@@ -1,0 +1,28 @@
+{
+  "services": {
+    "frontend": {
+      "cwd": "./random-2",
+      "cmd": "npx",
+      "args": ["vite", "--port", "3000", "--host", "127.0.0.1"],
+      "port": 3000
+    },
+    "backend": {
+      "cwd": "./random-1",
+      "cmd": "sh",
+      "args": ["-c", "npm run build && npx typeorm migration:run -d dist/data-source.js && node dist/main.js"],
+      "port": 8080,
+      "env": {
+        "FIREBASE_AUTH_DISABLED": "true"
+      },
+      "healthCheck": {
+        "path": "/api/health",
+        "timeoutSeconds": 180
+      },
+      "database": "task_tracker"
+    }
+  },
+  "routes": {
+    "/api": { "service": "backend", "stripPrefix": false },
+    "/": { "service": "frontend", "stripPrefix": false }
+  }
+}
