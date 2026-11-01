@@ -47,7 +47,7 @@ suites:
             references: { table: customers, columns: [customer_id] }
         expect_exact_foreign_keys: true
         check_constraints:
-          - "status IN ('placed', 'shipped', 'delivered')"
+          - "status = ANY(ARRAY['placed', 'shipped', 'delivered'])"
         columns:
           - { name: order_id, type: INTEGER, nullable: false, default: null }
           - { name: customer_id, type: INTEGER, nullable: false, default: null }
@@ -104,3 +104,9 @@ suites:
       - id: cross-object-view-query
         mode: measure
         sql: "SELECT lifetime_value, order_count FROM ${BUILD_DATASET}.customer_lifetime_value"
+      - id: view-object-type-check
+        mode: measure
+        sql: "SELECT table_name FROM information_schema.views WHERE table_schema = '${BUILD_DATASET}' AND table_name = 'customer_lifetime_value'"
+      - id: tables-object-type-check
+        mode: measure
+        sql: "SELECT table_name, table_type FROM information_schema.tables WHERE table_schema = '${BUILD_DATASET}' AND table_type = 'BASE TABLE' AND table_name IN ('customers', 'orders')"
